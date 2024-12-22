@@ -1,7 +1,9 @@
 import axios from "axios";
 import { Calculator } from "lucide-react";
 import React, { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { PricingFormData } from "../types";
+
 const categories = [
   "Automotive - Helmets & Riding Gloves",
   "Automotive - Tyres & Rims",
@@ -38,7 +40,8 @@ export default function PricingCalculator() {
         setResults(response.data);
       })
       .catch(function (error) {
-        console.log(error);
+        toast.error(error.message);
+        //console.log(error.message);
       });
   };
 
@@ -193,7 +196,7 @@ export default function PricingCalculator() {
                 Calculate Fees
               </button>
             </div>
-
+            <Toaster />
             {results && (
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
