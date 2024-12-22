@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import { Calculator } from 'lucide-react';
-import { PricingFormData } from '../types';
-import { calculateTotalFees } from '../utils/feeCalculators';
-
+import axios from "axios";
+import { Calculator } from "lucide-react";
+import React, { useState } from "react";
+import { PricingFormData } from "../types";
 const categories = [
-  'Automotive - Helmets & Riding Gloves',
-  'Automotive - Tyres & Rims',
-  'Automotive Vehicles',
-  'Baby - Hardlines',
-  'Baby - Strollers',
-  'Baby - Diapers',
-  'Books'
+  "Automotive - Helmets & Riding Gloves",
+  "Automotive - Tyres & Rims",
+  "Automotive Vehicles",
+  "Baby - Hardlines",
+  "Baby - Strollers",
+  "Baby - Diapers",
+  "Books",
 ];
 
 export default function PricingCalculator() {
@@ -18,24 +17,41 @@ export default function PricingCalculator() {
     productCategory: categories[0],
     sellingPrice: 0,
     weight: 0.5,
-    shippingMode: 'Easy Ship',
-    serviceLevel: 'Standard',
-    productSize: 'Standard',
-    location: 'Local'
+    shippingMode: "Easy Ship",
+    serviceLevel: "Standard",
+    productSize: "Standard",
+    location: "Local",
   });
 
   const [results, setResults] = useState<any>(null);
 
-  const handleCalculate = () => {
-    const calculatedFees = calculateTotalFees(formData);
-    setResults(calculatedFees);
+  const handleCalculate = async () => {
+    const url =
+      import.meta.env.VITE_BACKEND_URL + "/api/v1/profitability-calculator";
+    axios
+      .post(url, formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(function (response) {
+        setResults(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'sellingPrice' || name === 'weight' ? parseFloat(value) : value
+      [name]:
+        name === "sellingPrice" || name === "weight"
+          ? parseFloat(value)
+          : value,
     }));
   };
 
@@ -45,7 +61,9 @@ export default function PricingCalculator() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center gap-3 mb-8">
             <Calculator className="w-8 h-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Amazon Pricing Calculator</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Amazon Pricing Calculator
+            </h1>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -60,8 +78,10 @@ export default function PricingCalculator() {
                   onChange={handleInputChange}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -157,7 +177,11 @@ export default function PricingCalculator() {
                     <option>Local</option>
                     <option>Regional</option>
                     <option>National</option>
-                    <option>IXD</option>
+                    {formData.shippingMode !== "Easy Ship" ? (
+                      <option>IXD</option>
+                    ) : (
+                      ""
+                    )}
                   </select>
                 </div>
               </div>
@@ -172,32 +196,46 @@ export default function PricingCalculator() {
 
             {results && (
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Fee Breakdown</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Fee Breakdown
+                </h2>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Referral Fee:</span>
-                    <span className="font-medium">₹{results.referralFee.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{results.referralFee.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Weight Handling Fee:</span>
-                    <span className="font-medium">₹{results.weightHandlingFee.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{results.weightHandlingFee.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Closing Fee:</span>
-                    <span className="font-medium">₹{results.closingFee.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{results.closingFee.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pick & Pack Fee:</span>
-                    <span className="font-medium">₹{results.pickAndPackFee.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{results.pickAndPackFee.toFixed(2)}
+                    </span>
                   </div>
                   <div className="h-px bg-gray-200 my-4"></div>
                   <div className="flex justify-between text-lg font-semibold">
                     <span className="text-gray-900">Total Fees:</span>
-                    <span className="text-blue-600">₹{results.totalFees.toFixed(2)}</span>
+                    <span className="text-blue-600">
+                      ₹{results.totalFees.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold">
                     <span className="text-gray-900">Net Earnings:</span>
-                    <span className="text-green-600">₹{results.netEarnings.toFixed(2)}</span>
+                    <span className="text-green-600">
+                      ₹{results.netEarnings.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
